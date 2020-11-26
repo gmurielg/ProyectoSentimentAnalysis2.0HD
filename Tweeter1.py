@@ -164,13 +164,13 @@ def graf(data,user):
     #plt.subplot(2,1,1)
     for i in range(1, data.shape[0]+1):
         if data['Sentimiento'][i] == 'Positivo':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='green', s=5)
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='green', s=9.5)
             
         elif data['Sentimiento'][i] == 'Negativo':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='red', s=5)
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='red', s=9.5)
             
         elif data['Sentimiento'][i] == 'Neutro':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='blue', s=5)
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='blue', s=9.5)
       
     plt.title('Analisis sentimental para '+ user) 
     plt.xlabel('Polaridad') 
@@ -206,9 +206,9 @@ def ver():
     except:
         print('Verifique que el usuario añadido sea uno valido, intentelo de nuevo.')
         
-    sorteo(cuadro)
-    print('A continuación, se le presentara el análisis esquematico de los datos recolectados.')
-    nube(cuadro)
+    #sorteo(cuadro)
+    #print('A continuación, se le presentara el análisis esquematico de los datos recolectados.')
+    #nube(cuadro)
     graf(cuadro, user)
 
 ver()
