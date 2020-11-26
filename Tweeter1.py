@@ -33,8 +33,25 @@ api = tweepy.API(authenticate, wait_on_rate_limit = True)
 # =============================================================================
 
 class datos(object):
+    '''
+    Clase para extraer los datos con el uso de la API de tweeter, cuyos metodos
+    limpian de caracteres adicionales y tabulan los datos en cuestión.
+    '''
     
     def __init__(self, user, n=200, idiom = 'en'):
+        '''
+        Inicializar la clase
+
+        Parameters
+        ----------
+        user : str
+            Usuario de Tweeter valido a analizar.
+        n : int, optional
+            Número de comentarios a extraer. The default is 200.
+        idiom : str, optional
+            Idioma compatible de los comentarios. The default is 'en'.
+
+        '''
         
         self.dat = api.user_timeline(screen_name = user, count = n, 
                                 lang = idiom, tweet_mode = 'extended')
@@ -44,12 +61,27 @@ class datos(object):
         #self.dat = self.dat.translate({ord(j) : None for j in '#@\/\\+'})   
         
     def muestra(self):
+        '''
+        Brinda una muestra de los primeros 5 tweets extraidos de la cuenta.
+
+        '''
         
         print('Muestra de los primeros 5 tweets extraidos de la cuenta @'+self.user+' :\n')
         for i in self.dat[:5]:
             print('- '+ i.full_text + '\n')
     
     def Visualizar(self):
+        '''
+        Metodo cuya funciónes auxiliares, limpiasn los comentarios de caracteres 
+        adicionales de red y tabulan la información añadiendo la magnitud de 
+        subjetividad y polarización, junto con el sentumiento asociado.
+
+        Returns: df
+        -------
+        frame
+            Esquema tipo tabla de la información recolectada.
+
+        '''
         def limpiar(data):
             data = re.sub(r'#', '', data)
             data = re.sub(r'@[A-Za-z0–9]+', '', data)
@@ -88,6 +120,22 @@ class datos(object):
 # =============================================================================
 
 def nube(data):
+    '''
+    Esquematiza las palabras usadas más frecuentes, dando una perspectiva de los
+    topicos generales del discurso que maneja el usuario.
+
+    Parameters
+    ----------
+    data : frame
+        De los datos a analizar
+
+    Returns
+    -------
+    plot
+        Esquema que representa las palabras más frecuentes dandoles una magnitud de
+        tamaño.
+
+    '''
     palabras = ' '.join([i for i in data['Tweets']])
     nube = WordCloud(width=700, height=500, max_font_size=100, 
                      max_words= 215, min_word_length= 5, colormap = 'autumn').generate(palabras)
@@ -99,6 +147,20 @@ def nube(data):
 
 
 def sorteo(data):
+    '''
+    Organiza los comentarios en función de su polaridad y se los muestra en 
+    pantalla.
+
+    Parameters
+    ----------
+    data : frame
+        De los datos a analizar
+
+    Returns
+    -------
+    None.
+
+    '''
     v = input('Seleccióne p para el listado de tweets postivos o n para los negativos, a para ambos:\n')
     sortneg = data.sort_values(by=['Polaridad'],ascending=False) 
     sortpos = data.sort_values(by=['Polaridad'])
@@ -144,7 +206,21 @@ def sorteo(data):
     except :
         print('Por favor, inserte un carácter valido.')
 
-def graf(data,user):      
+def graf(data,user):  
+    '''
+    Esquematiza la subjetividad en función de la polaridad del usuario, para denotar
+    la tendencia general que tiene dicho usuario al escribir.
+    Esquematiza la porcentualidad del tipo de sentimiento en cada comentario, de la 
+    población de comentarios totales.
+
+    Parameters
+    ----------
+    data : frame
+        De los datos a analizar
+    user : str
+        Usuario de Tweeter valido a analizar.
+
+    '''    
     p = data[data.Sentimiento == 'Positivo']
     p = p['Tweets']  
     
@@ -191,6 +267,15 @@ def graf(data,user):
 # =============================================================================
 
 def ver():
+    '''
+    Función de implementación.
+    Aplica unainterfaz de uso.
+
+    Returns
+    -------
+    None.
+
+    '''
     user = input('Usuario a analizar: ')
     tabla = input('¿Desea ver la tabulación de los datos extraidos?\nSí es así, responda con un si:\n')
     
@@ -206,10 +291,11 @@ def ver():
     except:
         print('Verifique que el usuario añadido sea uno valido, intentelo de nuevo.')
         
-    #sorteo(cuadro)
-    #print('A continuación, se le presentara el análisis esquematico de los datos recolectados.')
-    #nube(cuadro)
+    sorteo(cuadro)
+    print('A continuación, se le presentara el análisis esquematico de los datos recolectados.')
+    nube(cuadro)
     graf(cuadro, user)
+
 
 ver()
 
