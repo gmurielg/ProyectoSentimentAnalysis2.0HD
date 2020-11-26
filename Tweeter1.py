@@ -34,7 +34,7 @@ api = tweepy.API(authenticate, wait_on_rate_limit = True)
 
 class datos(object):
     
-    def __init__(self, user, n=200, idiom = 'es'):
+    def __init__(self, user, n=200, idiom = 'en'):
         
         self.dat = api.user_timeline(screen_name = user, count = n, 
                                 lang = idiom, tweet_mode = 'extended')
@@ -82,10 +82,6 @@ class datos(object):
         df['Sentimiento'] = df['Polaridad'].apply(sentimiento)
         
         return df
-    
-data = datos('ClaudiaLopez')
-cuadro = data.Visualizar()
-display(cuadro)
 
 # =============================================================================
 # Analisis
@@ -94,40 +90,61 @@ display(cuadro)
 def nube(data):
     palabras = ' '.join([i for i in data['Tweets']])
     nube = WordCloud(width=700, height=500, max_font_size=100, 
-                     max_words= 215, min_word_length= 5, colormap = 'jet').generate(palabras)
+                     max_words= 215, min_word_length= 5, colormap = 'autumn').generate(palabras)
     
     
     plt.imshow(nube, interpolation='spline16')
     plt.axis('off')
     return plt.show()
 
-#nube(cuadro)
 
 def sorteo(data):
-    v = input('Seleccióne p para tweets postivos o n para negativos:\n')
+    v = input('Seleccióne p para el listado de tweets postivos o n para los negativos, a para ambos:\n')
     sortneg = data.sort_values(by=['Polaridad'],ascending=False) 
     sortpos = data.sort_values(by=['Polaridad'])
     
-    j=1
-    if v == 'n':
-        print('Tweets negativos:\n')
-        
-        for i in range(1, sortneg.shape[0] ):
-          if( sortneg['Sentimiento'][i] == 'Negativo'):
-            print(str(j)+'. ' + sortneg['Tweets'][i] + '\n')
-            j+=1
+    print()
+    try:
+        while True:
+            if v == 'n':
+                print('Tweets negativos:\n\n')
+                j=1
+                for i in range(1, sortneg.shape[0] ):
+                  if( sortneg['Sentimiento'][i] == 'Negativo'):
+                    print(str(j)+'. ' + sortneg['Tweets'][i] + '\n')
+                    j+=1
+                break
+                    
+                    
+            elif v == 'p':
+                print('Tweets positivos:\n\n')
+                j=1
+                for i in range(1, sortneg.shape[0] ):
+                  if( sortpos['Sentimiento'][i] == 'Positivo'):
+                    print(str(j)+'. ' + sortneg['Tweets'][i] + '\n')
+                    j+=1
+                break
             
-    elif v == 'p':
-        print('Tweets positivos:\n')
-        
-        for i in range(1, sortneg.shape[0] ):
-          if( sortpos['Sentimiento'][i] == 'Positivo'):
-            print(str(j)+'. ' + sortneg['Tweets'][i] + '\n')
-            j+=1
+            elif v=='a':
+                print('Tweets negativos:\n\n')
+                j=1
+                for i in range(1, sortneg.shape[0] ):
+                  if( sortneg['Sentimiento'][i] == 'Negativo'):
+                    print(str(j)+'. ' + sortneg['Tweets'][i] + '\n')
+                    j+=1
+                
+                print()
+                print('Tweets positivos:\n\n')
+                l=1
+                for i in range(1, sortneg.shape[0] ):
+                  if( sortpos['Sentimiento'][i] == 'Positivo'):
+                    print(str(l)+'. ' + sortneg['Tweets'][i] + '\n')
+                    l+=1
+                break
+    except :
+        print('Por favor, inserte un carácter valido.')
 
-#sorteo(cuadro)
-
-def graf(data):      
+def graf(data,user):      
     p = data[data.Sentimiento == 'Positivo']
     p = p['Tweets']  
     
@@ -140,36 +157,61 @@ def graf(data):
     vals = [(p.shape[0] / data.shape[0])*100, (n.shape[0] / data.shape[0])*100, 
             (neg.shape[0] / data.shape[0])*100]
     
-    plt.figure(figsize=(8,12))
-    fig, axes = plt.subplots(nrows=2, ncols=1)
+    #plt.figure(figsize=(8,12))
+    #fig, axes = plt.subplots(nrows=2, ncols=1)
     plt.style.use('dark_background')
     
-    plt.subplot(2,1,1)
+    #plt.subplot(2,1,1)
     for i in range(1, data.shape[0]+1):
         if data['Sentimiento'][i] == 'Positivo':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='green')
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='green', s=5)
             
         elif data['Sentimiento'][i] == 'Negativo':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='red')
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='red', s=5)
             
         elif data['Sentimiento'][i] == 'Neutro':
-            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='blue')
+            plt.scatter(data['Polaridad'][i], data['Subjetividad'][i], color='blue', s=5)
       
-    plt.title('Disperción de polaridad contra subjetividad') 
+    plt.title('Analisis sentimental para '+ user) 
     plt.xlabel('Polaridad') 
     plt.ylabel('Subjetividad') 
-
-    plt.subplot(2,1,2)
+    plt.show()
+    
+    #plt.subplot(2,1,2)
     plt.bar(['Positivo', 'Neutro', 'Negativo'], vals, width = 0.2)
     plt.title('Porcentaje del caracter de los Sentimientos')
     plt.xlabel('Sentimiento')
     plt.ylabel('Porcentaje')
     
-    fig.tight_layout(pad=1)
+    #fig.tight_layout(pad=1)
     plt.show()
-    
+ 
+# =============================================================================
+# Visualización
+# =============================================================================
 
-graf(cuadro)
+def ver():
+    user = input('Usuario a analizar: ')
+    tabla = input('¿Desea ver la tabulación de los datos extraidos?\nSí es así, responda con un si:\n')
+    
+    print()
+    try:   
+        while True:
+            data = datos(user)
+            cuadro = data.Visualizar()
+            if tabla == 'si':
+                print('Visualización de los comentarios extraidos:')
+                display(cuadro)            
+            break
+    except:
+        print('Verifique que el usuario añadido sea uno valido, intentelo de nuevo.')
+        
+    sorteo(cuadro)
+    print('A continuación, se le presentara el análisis esquematico de los datos recolectados.')
+    nube(cuadro)
+    graf(cuadro, user)
+
+ver()
 
 
 
